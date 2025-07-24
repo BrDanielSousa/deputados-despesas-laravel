@@ -1,0 +1,10 @@
+FROM composer:2.7
+
+RUN apk add --no-cache --virtual build-deps \
+    icu-dev zlib-dev g++ make automake autoconf libzip-dev \
+    libpng-dev libwebp-dev libjpeg-turbo-dev freetype-dev && \
+    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp && \
+    docker-php-ext-install gd zip intl
+
+# Remove pacotes desnecessários após a instalação
+RUN apk del build-deps
