@@ -9,7 +9,7 @@ interface DeputadoServiceInterface
 {
     public function getDeputado(int $id): Deputado;
 
-    public function getDeputados(): array;
+    public function getDeputados(?string $filtro = null): LengthAwarePaginator;
 
     public function getDespesasDoDeputado(int $id): LengthAwarePaginator;
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Contracts\DeputadoServiceInterface;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
@@ -12,11 +13,12 @@ class DashboardController extends Controller
     {
         $this->deputadoService = $deputadoService;
     }
-    
-    public function dashboard()
-    {
-        $deputados = $this->deputadoService->getDeputados();
 
-        return view('dashboard', compact('deputados'));
+    public function dashboard(Request $request)
+    {
+        $filtro = $request->input('filtro');
+        $deputados = $this->deputadoService->getDeputados($filtro);
+
+        return view('dashboard', compact('deputados', 'filtro'));
     }
 }

@@ -28,9 +28,9 @@ class DeputadoService implements DeputadoServiceInterface
         return $this->deputadoRepo->getDeputado($id);
     }
 
-    public function getDeputados(): array
+    public function getDeputados(?string $filtro = null): LengthAwarePaginator
     {
-        return $this->deputadoRepo->getDeputados();
+        return $this->deputadoRepo->getDeputados($filtro);
     }
 
     public function getDespesasDoDeputado(int $id): LengthAwarePaginator

@@ -46,16 +46,6 @@
     border-radius: 50%;
     border: 2px solid #dee2e6;
   }
-
-  #paginacao {
-    margin-top: 20px;
-  }
-
-  #numeros-paginas button.active {
-    background-color: #0d6efd !important;
-    color: #fff !important;
-    border-color: #0d6efd;
-  }
 </style>
 @endpush
 
@@ -97,12 +87,12 @@
       </div>
       @endif
 
-      {{-- Filtro --}}
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <input type="text" id="filtro-nome" class="form-control" placeholder="Filtrar por nome...">
+      <form method="GET" action="{{ route('dashboard') }}">
+        <div class="input-group mb-4">
+          <input type="text" name="filtro" class="form-control" placeholder="Filtrar por nome..." value="{{ $filtro ?? '' }}">
+          <button type="submit" class="btn btn-outline-secondary">Filtrar</button>
         </div>
-      </div>
+      </form>
 
       {{-- Tabela --}}
       <div class="table-responsive">
@@ -121,17 +111,17 @@
             @forelse ($deputados as $dep)
             <tr>
               <td>
-                <img src="{{ $dep['url_foto'] ?? asset('images/fallback.jpg') }}"
-                  alt="{{ $dep['nome'] }}"
+                <img src="{{ $dep->url_foto ?? asset('images/fallback.jpg') }}"
+                  alt="{{ $dep->nome }}"
                   class="deputado-foto"
                   onerror="this.onerror=null;this.src='{{ asset('images/fallback.jpg') }}';">
               </td>
-              <td>{{ $dep['nome'] }}</td>
-              <td>{{ $dep['sigla_partido'] }}</td>
-              <td>{{ $dep['sigla_uf'] }}</td>
-              <td>{{ $dep['email'] }}</td>
+              <td>{{ $dep->nome }}</td>
+              <td>{{ $dep->sigla_partido }}</td>
+              <td>{{ $dep->sigla_uf }}</td>
+              <td>{{ $dep->email }}</td>
               <td>
-                <a href="{{ route('getDeputadoDetalhado', $dep['id']) }}" class="btn btn-primary">Ver</a>
+                <a href="{{ route('getDeputadoDetalhado', $dep->id) }}" class="btn btn-primary">Ver</a>
               </td>
             </tr>
             @empty
@@ -144,77 +134,10 @@
       </div>
 
       {{-- Paginação --}}
-      <div id="paginacao" class="d-flex justify-content-center align-items-center flex-wrap">
-        <div id="numeros-paginas" class="d-flex flex-wrap gap-1"></div>
+      <div class="mt-4 d-flex justify-content-center">
+        {{ $deputados->links() }}
       </div>
     </div>
   </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const inputFiltro = document.getElementById('filtro-nome');
-    const linhas = Array.from(document.querySelectorAll('tbody tr'));
-    const linhasPorPagina = 20;
-    let paginaAtual = 1;
-    let linhasFiltradas = [...linhas];
-
-    function renderizaTabela() {
-      const inicio = (paginaAtual - 1) * linhasPorPagina;
-      const fim = inicio + linhasPorPagina;
-
-      linhas.forEach(linha => linha.style.display = 'none');
-      linhasFiltradas.slice(inicio, fim).forEach(linha => linha.style.display = '');
-
-      renderizaNumerosPaginas();
-    }
-
-    function renderizaNumerosPaginas() {
-      const totalPaginas = Math.ceil(linhasFiltradas.length / linhasPorPagina);
-      const container = document.getElementById('numeros-paginas');
-      container.innerHTML = '';
-
-      const range = 2; // Quantidade de páginas ao redor da atual
-      const start = Math.max(1, paginaAtual - range);
-      const end = Math.min(totalPaginas, paginaAtual + range);
-
-      if (paginaAtual > 1) container.appendChild(criaBotao('«', 1));
-      if (paginaAtual > 1) container.appendChild(criaBotao('‹', paginaAtual - 1));
-
-      for (let i = start; i <= end; i++) {
-        const btn = criaBotao(i, i);
-        if (i === paginaAtual) btn.classList.add('active');
-        container.appendChild(btn);
-      }
-
-      if (paginaAtual < totalPaginas) container.appendChild(criaBotao('›', paginaAtual + 1));
-      if (paginaAtual < totalPaginas) container.appendChild(criaBotao('»', totalPaginas));
-    }
-
-    function criaBotao(texto, pagina) {
-      const btn = document.createElement('button');
-      btn.textContent = texto;
-      btn.className = 'btn btn-outline-primary btn-sm mx-1 rounded';
-      btn.addEventListener('click', () => {
-        paginaAtual = pagina;
-        renderizaTabela();
-      });
-      return btn;
-    }
-
-    inputFiltro.addEventListener('input', function() {
-      const termo = this.value.toLowerCase();
-      linhasFiltradas = linhas.filter(linha => {
-        const nome = linha.querySelector('td:nth-child(2)').textContent.toLowerCase();
-        return nome.includes(termo);
-      });
-      paginaAtual = 1;
-      renderizaTabela();
-    });
-
-    renderizaTabela();
-  });
-</script>
-@endpush

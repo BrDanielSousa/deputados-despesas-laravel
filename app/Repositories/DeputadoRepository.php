@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Deputado;
 use App\Repositories\Contracts\DeputadoRepositoryInterface;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class DeputadoRepository implements DeputadoRepositoryInterface
 {
@@ -13,9 +14,15 @@ class DeputadoRepository implements DeputadoRepositoryInterface
         return Deputado::find($deputadoId);
     }
 
-    public function getDeputados(): array
+    public function getDeputados(?string $filtro = null): LengthAwarePaginator
     {
-        return Deputado::all()->toArray();
+        $query = Deputado::query();
+
+        if ($filtro) {
+            $query->where('nome', 'ILIKE', '%' . $filtro . '%');
+        }
+
+        return $query->orderBy('nome')->paginate(20)->withQueryString();
     }
 
     public function firstOrCreate(array $dados): Deputado
